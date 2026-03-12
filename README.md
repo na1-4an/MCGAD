@@ -6,7 +6,7 @@
 
 ---
 ## 1. Overview
-This is an anonymized repository for paper **[One-class Monophily-Aware Contrastive Learning for Graph Anomaly Detection]**.
+This is a repository for paper **[One-class Monophily-Aware Contrastive Learning for Graph Anomaly Detection]**.
 
 
 ## 2. Repository Structure

@@ -19,8 +19,9 @@ repo_root/
   │   ├── train.py       
   │   └── utils.py             
   ├── 2_hop_map/                
-  ├── 2hop_aggre/    
+  ├── 2hop_standard_aggr/    
   ├── dataset/             
+  ├── xl2x/             
   ├── requirements.txt       
   ├── run.py   
   └── run.sh       
@@ -42,13 +43,13 @@ bash run.sh
 
 The following table summarizes the hyperparameter settings used for each dataset:
 
-| Dataset        | α   | β   | Learning Rate | Weight Decay | BatchNorm | Epochs  |
-| -------------- | --- | --- | ------------- | ------------ | --------- | ------- |
-| **Book**       | 0.2 | 0.3 | 0.0003        | 0            | ✅         | 100 |
-| **Reddit**     | 0.4 | 0.1 | 0.0001        | 0            | ✅         | 100 |
-| **Amazon-all** | 0.1 | 0.4 | 0.0003        | 0.0005       | –         | 100 |
-| **Tolokers**   | 0.9 | 0.7 | 0.0001        | 0.0005       | ✅         | 100 |
-| **T-Finance**  | 0.7 | 1.1 | 0.0005        | 0.0005       | ✅         | 500 |
-| **Elliptic**   | 0.9 | 1.1 | 0.0005        | 0            | –         | 500 |
-| **YelpChi**    | 0.1 | 0.1 | 0.0001        | 0            | –         | 100 |
-| **Questions**  | 0.2 | 0.1 | 0.0005        | 0            | –         | 500 |
+| Dataset        | α   | β   | γ   | Learning Rate | BatchNorm |
+| -------------- | --- | --- | --- | ------------- | --------- |
+| **Book**       | 0.3 | 1.0 | 0.5 | 0.0001        | ✅         |
+| **Reddit**     | 0.1 | 0.9 | 0.2 | 0.0005        | ✅         |
+| **Amazon-all** | 0.1 | 0.8 | 0.5 | 0.001         | –         |
+| **Tolokers**   | 0.2 | 0.1 | 0.5 | 0.0001        | –         |
+| **T-Finance**  | 0.1 | 0.8 | 0.2 | 0.0001        | –         |
+| **Elliptic**   | 0.1 | 1.0 | 0.5 | 0.001         | –         |
+| **YelpChi**    | 0.1 | 0.7 | 0.5 | 0.0001        | ✅         |
+| **Questions**  | 0.1 | 0.4 | 0.4 | 0.001         | ✅         |

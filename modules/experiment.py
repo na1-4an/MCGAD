@@ -7,7 +7,7 @@ from tqdm import tqdm
 from modules.model import MCGAD
 from modules.train import train_model, eval_model
 
-def run_experiment(args, seed, device, dataloader, ano_label, edge_index):
+def run_experiment(args, seed, device, dataloader, ano_label, edge_index, xl2x=None):
     # Create MCGAD model
     model = MCGAD(
         g=dataloader.g,
@@ -16,18 +16,18 @@ def run_experiment(args, seed, device, dataloader, ano_label, edge_index):
         n_in=dataloader.en.shape[1],
         n_hidden=args.n_hidden,
         bn = args.bn,
-        beta = args.beta
+        gamma = args.gamma,
+        dataset_name=args.dataset,
+        xl2x=xl2x,
+
     )
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=args.lr,
                                  weight_decay=args.weight_decay)
-    loss_function = torch.nn.BCELoss()
-
-    print(f"Seed {seed}")
     torch.cuda.reset_peak_memory_stats()
     state_path, stats, time_train = train_model(
-        args, dataloader, model, optimizer, loss_function
+        args, dataloader, model, optimizer, ano_label
     )
     mem_train = torch.cuda.max_memory_allocated()
     model.load_state_dict(torch.load(state_path))

@@ -1,17 +1,12 @@
 import os
 os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':4096:8'
-os.environ['PYTHONHASHSEED'] = '0'  # 또는 고정값
+os.environ['PYTHONHASHSEED'] = '0'
 import dgl
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import json
 import random
-import shutil
 import scipy.io as sio
 import scipy.sparse as sp
-from tqdm import tqdm
-import torch.nn.functional as F
 from scipy.sparse import csr_matrix
 from scipy.sparse import csgraph
 
@@ -47,14 +42,15 @@ def sparse_to_tuple(sparse_mx, insert_batch=False):
 
     return sparse_mx
 
+from sklearn.preprocessing import StandardScaler
+
 def preprocess_features(features):
-    """Row-normalize feature matrix and convert to tuple representation"""
-    rowsum = np.array(features.sum(1))
-    r_inv = np.power(rowsum, -1).flatten()
-    r_inv[np.isinf(r_inv)] = 0.
-    r_mat_inv = sp.diags(r_inv)
-    features = r_mat_inv.dot(features)
-    return features.todense(), sparse_to_tuple(features)
+    features_dense = features.toarray()
+    scaler = StandardScaler()
+    features_scaled = scaler.fit_transform(features_dense)
+    features_sparse = sp.csr_matrix(features_scaled)
+
+    return features_scaled, sparse_to_tuple(features_sparse)
 
 def load_mat(dataset, train_rate=0.3, val_rate=0.1):
     data = sio.loadmat("./dataset/{}.mat".format(dataset))
@@ -116,7 +112,6 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     return torch.sparse.FloatTensor(indices, values, shape)
 
 def get_lap(edge_index, n):
-    print(n)
     edge_indext = edge_index.T
     adjacency = csr_matrix((np.ones(edge_indext.shape[0]), (edge_indext[:, 0], edge_indext[:, 1])), shape=(n, n))
     nadj = csgraph.laplacian(adjacency, normed=True)

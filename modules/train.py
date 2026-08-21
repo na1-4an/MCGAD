@@ -1,5 +1,5 @@
 import time
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, average_precision_score
 import json
 import copy
 import os
@@ -8,32 +8,34 @@ import torch
 import torch.nn.functional as F
 from modules.utils import rescale
 from tqdm import tqdm
-
-from sklearn.manifold import TSNE
-import matplotlib.pyplot as plt
 from pathlib import Path
 
-
-def train_model(args, dataloader, model, optimizer, loss_function):
+def train_model(args, dataloader, model, optimizer, ano_label=None):
+    if ano_label is not None:
+        ano_label = torch.as_tensor(ano_label, device=dataloader.en.device)
 
     stats = {
         "best_loss": 1e9,
         "best_epoch": -1,
     }
-    state_path = f'./ckpt/{args.dataset}.pkl'
+    state_path = getattr(args, "checkpoint_path", None) or f'./ckpt/{args.dataset}.pkl'
+    Path(state_path).parent.mkdir(parents=True, exist_ok=True)
     time_train = time.time()
+    x_ego, x_2hop = dataloader.get_data()
+
+    raw_sim = F.cosine_similarity(x_ego, x_2hop, dim=1)
 
     for epoch in tqdm(range(args.num_epoch), desc="Training Epochs"):
         model.train()
         optimizer.zero_grad()
         x_ego, x_2hop = dataloader.get_data()
 
-        score, loss_uni = model(x_ego, x_2hop)
-
+        score, loss_uni, gad_loss = model(x_ego, x_2hop)
         score = rescale(score)
-        loss_mono = loss_function(score, dataloader.label_ones)
 
-        loss = (1-args.alpha)*loss_mono + args.alpha*loss_uni
+        raw_score = rescale(raw_sim).detach().unsqueeze(0)
+        loss_recon = torch.nn.functional.mse_loss(score, raw_score)
+        loss = args.alpha * loss_uni + args.beta * loss_recon + gad_loss
         loss.backward()
 
         if loss < stats["best_loss"]:
